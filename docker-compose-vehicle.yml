@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  acorn_server:
+  acorn_vehicle:
     build: .
     container_name: acorn_vehicle
     image: acorn_docker:1.0
@@ -17,4 +17,3 @@ services:
     command: sh -c /home/pi/vehicle/autolaunch_vehicle.sh
     restart: unless-stopped
     network_mode: "host"
-
