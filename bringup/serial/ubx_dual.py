@@ -6,18 +6,48 @@
 #     (raw_data, parsed_data) = nmr.read()
 #     print(parsed_data)
 import time
-
+import sys
 from serial import Serial
 from pyubx2 import UBXReader
-
 from pyubx2.ubxhelpers import itow2utc
+from pyubx2 import UBXMessage
+# layers = 1
+# transaction = 0
+# cfgData = [("CFG_RATE_MEAS", 40)]
+msg = UBXMessage.config_set(layers=1, transaction=0, cfgData=[("CFG_RATE_MEAS", 40)])
+# print(msg)
+# sys.exit()
 
-stream = Serial('/dev/ttySC5', 921600, timeout=0.1)
-ubr = UBXReader(stream)
+stream0 = Serial('/dev/ttySC4', 921600, timeout=0.10)
+stream1 = Serial('/dev/ttySC5', 921600, timeout=0.10)
+# Set high measurement rate.
+
+ubr0 = UBXReader(stream0)
+ubr1 = UBXReader(stream1)
+
 start = time.time()
 loop_count = 0
 while True:
-    (raw_data, parsed_data) = ubr.read()
+    try:
+        # ubr._stream.write(msg.serialize())
+        (raw_data, parsed_data0) = ubr0.read()
+        (raw_data, parsed_data1) = ubr1.read()
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print(f"{parsed_data0.numSV} {parsed_data1.numSV}")
+        # print(parsed_data.iTOW)
+        # print(parsed_data.identity)
+        # print(dir(parsed_data))
+
+
+    except KeyboardInterrupt:
+        break
+    except Exception:
+        pass
+
+    # if time.time() - start > 5:
+    #     if msg:
+    #         ubr._stream.write(msg.serialize())
+    #         msg = None
     # print(stream.readline())
     # loop_count += 1
     # if time.time() - start > 1.0:
@@ -25,15 +55,23 @@ while True:
     #     loop_count = 0
     #     start = time.time()
     # print(parsed_data.identity)
-    print(f"{parsed_data.lat} {parsed_data.lon} {itow2utc(parsed_data.iTOW)}")
-    # print(parsed_data)
+    #print(f"{parsed_data.lat} {parsed_data.lon} {itow2utc(parsed_data.iTOW)} {parsed_data.vehHeading}")
+
     # print(itow2utc(parsed_data.iTOW))
     # print(parsed_data.fixType)
 
 
 
 """
-
+<UBX(NAV-PVT, iTOW=23:23:00.200000, year=2022, month=5, day=25, hour=23,
+min=23, second=0, validDate=1, validTime=1, fullyResolved=1, validMag=0,
+tAcc=21, nano=199625482, fixType=3, gnssFixOk=1, difSoln=1, psmState=0,
+headVehValid=0, carrSoln=2, confirmedAvai=1, confirmedDate=1,
+confirmedTime=1, numSV=18, lon=-122.3333634, lat=37.354267,
+height=83784, hMSL=114090, hAcc=14, vAcc=10, velN=2, velE=-1, velD=-9,
+gSpeed=3, headMot=351.58296, sAcc=16, headAcc=93.05322, pDOP=1.33,
+invalidLlh=0, lastCorrectionAge=2, reserved0=558842204, headVeh=0.0,
+magDec=0.0, magAcc=0.0)>
 
 <UBX(NAV-PVAT, iTOW=00:51:08, version=0, validDate=1, validTime=1, fullyResolved=1,
 validMag=1, year=2022, month=4, day=16, hour=0, min=51, sec=8, reserved0=0,
