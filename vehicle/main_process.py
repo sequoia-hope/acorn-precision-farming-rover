@@ -32,12 +32,12 @@ import time
 import yaml
 import wifi
 import zmq
+import banner_art
 
 import nvidia_power_process
 from remote_control_process import run_control
 import model
 import server_comms
-import voltage_monitor_process
 from utils import AppendFIFO, config_logging
 
 
@@ -106,8 +106,8 @@ class MainProcess():
 
     def run(self, stop_signal):
         # This module throws out debug messages so we change its logger level.
-        i2c_logger = logging.getLogger('Adafruit_I2C')
-        i2c_logger.setLevel(logging.CRITICAL)
+        # i2c_logger = logging.getLogger('Adafruit_I2C')
+        # i2c_logger.setLevel(logging.CRITICAL)
 
         self.print_banner()
 
@@ -157,10 +157,7 @@ class MainProcess():
                   self.debug, self.simulation))
         remote_control_proc.start()
 
-        voltage_monitor_parent_conn, voltage_monitor_child_conn = mp.Pipe()
-        voltage_proc = mp.Process(target=voltage_monitor_process.sampler_loop,
-                                  args=(stop_signal, voltage_monitor_child_conn, self.simulation,))
-        voltage_proc.start()
+
 
         self.ping_until_reachable(self.acorn.server.split(':')[0])
 
@@ -184,10 +181,10 @@ class MainProcess():
 
             # print("4444")
 
-            if voltage_monitor_parent_conn.poll():
-                self.acorn.cell1, self.acorn.cell2, self.acorn.cell3, total = voltage_monitor_parent_conn.recv()
-                # self.acorn.voltage = total
-                updated_object = True
+            # if voltage_monitor_parent_conn.poll():
+            #     self.acorn.cell1, self.acorn.cell2, self.acorn.cell3, total = voltage_monitor_parent_conn.recv()
+            #     # self.acorn.voltage = total
+            #     updated_object = True
 
             while wifi_parent_conn.poll():
                 self.acorn.wifi_strength, self.acorn.wifi_ap_name, self.acorn.cpu_temperature_c = wifi_parent_conn.recv()
@@ -223,31 +220,10 @@ class MainProcess():
         #    print("((8888))")
 
     def print_banner(self):
+        """ Print ascii art banner """
         for _ in range(10):
             self.logger.info("")
-
-        banner = r"""
-                                          _____           _
-             /\                          / ____|         | |
-            /  \   ___ ___  _ __ _ __   | (___  _   _ ___| |_ ___ _ __ ___
-           / /\ \ / __/ _ \| '__| '_ \   \___ \| | | / __| __/ _ \ '_ ` _ \
-          / ____ \ (_| (_) | |  | | | |  ____) | |_| \__ \ ||  __/ | | | | |
-         /_/    \_\___\___/|_|  |_| |_| |_____/ \__, |___/\__\___|_| |_| |_|
-                                                 __/ |
-                                                |___/
-                              _
-                            _(_)_                          wWWWw   _
-                @@@@       (_)@(_)   vVVVv     _     @@@@  (___) _(_)_
-               @@()@@ wWWWw  (_)\    (___)   _(_)_  @@()@@   Y  (_)@(_)
-                @@@@  (___)     `|/    Y    (_)@(_)  @@@@   \|/   (_)\
-                 /      Y       \|    \|/    /(_)    \|      |/      |
-              \ |     \ |/       | / \ | /  \|/       |/    \|      \|/
-          jgs \\|//   \\|///  \\\|//\\\|/// \|///  \\\|//  \\|//  \\\|//
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        """
-        # Flower art by joan stark via https://www.asciiart.eu/plants/flowers
-
-        for line in banner.split('\n'):
+        for line in banner_art.BANNER.split('\n'):
             self.logger.info(line)
 
     def ping_until_reachable(self, server):
