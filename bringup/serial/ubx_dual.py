@@ -18,7 +18,7 @@ from pyubx2 import UBXMessage
 # print(msg)
 # sys.exit()
 
-stream0 = Serial('/dev/ttyACM0', 921600, timeout=0.10)
+stream0 = Serial('/dev/ttySC2', 921600, timeout=0.10)
 # stream1 = Serial('/dev/ttySC5', 921600, timeout=0.10)
 # Set high measurement rate.
 
