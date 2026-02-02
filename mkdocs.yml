@@ -1,0 +1,64 @@
+site_name: Acorn Rover Documentation
+site_description: Architecture documentation for Acorn Precision Farming Rover
+site_url: https://sequoia-hope.github.io/acorn-precision-farming-rover/
+repo_url: https://github.com/sequoia-hope/acorn-precision-farming-rover
+repo_name: sequoia-hope/acorn-precision-farming-rover
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: green
+      accent: light green
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: green
+      accent: light green
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mermaid2
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Architecture:
+    - Documentation Plan: architecture/DOCUMENTATION_PLAN.md
+    - 1. System Context: architecture/01-system-context.md
+    - 2. Components: architecture/02-components.md
+    - 3. Data Flows: architecture/03-data-flows.md
+    - 4. Interfaces: architecture/04-interfaces.md
+    - 5. State Machines: architecture/05-state-machines.md
+    - 6. Configuration: architecture/06-configuration.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sequoia-hope/acorn-precision-farming-rover
