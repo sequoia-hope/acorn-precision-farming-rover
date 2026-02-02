@@ -1,0 +1,20 @@
+%%{init: {'theme': 'base'}}%%
+flowchart LR
+    subgraph FIELD_NETWORK["Field Network (WiFi/Ethernet)"]
+        V1[Vehicle 1<br/>192.168.1.x]
+        V2[Vehicle 2<br/>192.168.1.x]
+        VN[Vehicle N<br/>...]
+    end
+
+    subgraph SERVER_NETWORK["Server Network"]
+        SRV[Server<br/>192.168.1.170]
+    end
+
+    subgraph OPERATOR_NETWORK["Operator Access"]
+        OP[Operator<br/>Any network location]
+    end
+
+    V1 <-->|ZMQ:5570| SRV
+    V2 <-->|ZMQ:5570| SRV
+    VN <-->|ZMQ:5570| SRV
+    OP -->|HTTP:80| SRV

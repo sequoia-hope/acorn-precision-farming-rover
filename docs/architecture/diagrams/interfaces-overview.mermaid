@@ -1,0 +1,42 @@
+%%{init: {'theme': 'base'}}%%
+flowchart TB
+    subgraph VEHICLE["Vehicle"]
+        RC[remote_control_process]
+        MAIN[main_process]
+        MOT[motors_can]
+        COMMS[server_comms]
+
+        RC <-->|"Manager.dict<br/>pickle"| MAIN
+        RC <-->|"SharedMemory<br/>numpy"| MOT
+        MAIN <-->|"Pipe<br/>pickle"| COMMS
+    end
+
+    subgraph SERVER["Server"]
+        ZMQ[ZMQ Queue<br/>:5570/:5569]
+        WORK[ZMQ Workers]
+        REDIS[(Redis<br/>:6379)]
+        FLASK[Flask<br/>:80]
+
+        ZMQ <--> WORK
+        WORK <-->|"pickle"| REDIS
+        FLASK <-->|"pickle/JSON"| REDIS
+    end
+
+    subgraph HARDWARE["Hardware"]
+        CAN[CAN Bus<br/>can1]
+        GPS[GPS Receivers<br/>/dev/ttySC0,1]
+    end
+
+    COMMS <-->|"ZMQ REQ/ROUTER<br/>TCP:5570"| ZMQ
+    MOT <-->|"ISO-TP<br/>IDs 0x06-0x09"| CAN
+    RC <-->|"Serial 921600<br/>pyubx2"| GPS
+
+    subgraph UI["User Interface"]
+        BROWSER[Web Browser]
+    end
+
+    BROWSER <-->|"HTTP REST<br/>JSON"| FLASK
+
+    style VEHICLE fill:#2d8659,color:#fff
+    style SERVER fill:#4a9eff,color:#fff
+    style HARDWARE fill:#e67e22,color:#fff

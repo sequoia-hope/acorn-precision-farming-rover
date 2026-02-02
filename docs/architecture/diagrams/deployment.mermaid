@@ -1,0 +1,49 @@
+%%{init: {'theme': 'base'}}%%
+flowchart TB
+    subgraph FIELD["Field Environment"]
+        subgraph ROVER["Rover Hardware (Jetson Nano / Raspberry Pi)"]
+            subgraph VEHICLE_CONTAINER["Docker: acorn_vehicle"]
+                MAIN[main_process.py<br/>Orchestrator]
+                MOTORS[motors_can.py<br/>Motor Control]
+                LEDS[led_control.py<br/>Status LEDs]
+                RTCM[rtcm_relay.py<br/>RTK Corrections]
+            end
+
+            subgraph HW["Hardware Interfaces"]
+                CAN[CAN Bus<br/>4x Corner Motors]
+                I2C[I2C Bus<br/>Display, ADC, IMU]
+                SERIAL[Serial Ports<br/>GPS x2, RTCM]
+                GPIO[GPIO<br/>LEDs, Buttons]
+            end
+
+            VEHICLE_CONTAINER --> HW
+        end
+
+        GPS_RX[Dual GPS Receivers<br/>UBlox F9P]
+        MOTOR_HW[Swerve Drive Motors<br/>4x Steering + 4x Traction]
+
+        GPS_RX -->|Serial| SERIAL
+        CAN -->|CAN 2.0| MOTOR_HW
+    end
+
+    subgraph INFRASTRUCTURE["Server Infrastructure"]
+        subgraph SERVER_CONTAINER["Docker: acorn_server"]
+            REDIS[(Redis<br/>State Database)]
+            ZMQ_SRV[zmq_server_pirate.py<br/>Message Broker]
+            FLASK[server.py<br/>Flask Web App]
+            SYSMGR[system_manager.py<br/>Fleet Automation]
+        end
+    end
+
+    subgraph CLIENT["Operator Workstation"]
+        BROWSER[Web Browser<br/>Dashboard UI]
+    end
+
+    VEHICLE_CONTAINER <-->|ZMQ:5570| ZMQ_SRV
+    BROWSER -->|HTTP:80| FLASK
+    FLASK --> REDIS
+    ZMQ_SRV --> REDIS
+    SYSMGR --> REDIS
+
+    style VEHICLE_CONTAINER fill:#2d8659,color:#fff
+    style SERVER_CONTAINER fill:#4a9eff,color:#fff

@@ -1,0 +1,43 @@
+%%{init: {'theme': 'base'}}%%
+flowchart LR
+    subgraph MAIN["main_process.py"]
+        M_ROBOT[Robot Object]
+        M_PIPE_S[Pipe to server_comms]
+        M_PIPE_W[Pipe to wifi]
+        M_DICT[Manager Dict]
+    end
+
+    subgraph REMOTE["remote_control_process.py"]
+        R_STATE[Control State]
+        R_GPS[GPS Reader]
+        R_PID[PID Controller]
+        R_SHM[Shared Memory Writer]
+    end
+
+    subgraph MOTORS["motors_can.py"]
+        MO_SHM[Shared Memory Reader]
+        MO_CAN[CAN Interface]
+    end
+
+    subgraph SERVER_COMMS["server_comms.py"]
+        SC_ZMQ[ZMQ Client]
+    end
+
+    subgraph WIFI["wifi.py"]
+        W_MON[WiFi Monitor]
+    end
+
+    %% Data flows with types
+    M_PIPE_S <-->|"[cmd, key, pickle(data)]"| SC_ZMQ
+    M_PIPE_W <--|"(strength, ap_name, cpu_temp)"| W_MON
+
+    M_DICT <-->|"pickle(RobotSubset)"| R_STATE
+    M_DICT <--|"pickle(control_tuple)"| R_STATE
+
+    R_SHM -->|"np.array steering cmds"| MO_SHM
+    MO_SHM -->|"np.array motor feedback"| R_SHM
+
+    %% Styling
+    style MAIN fill:#2d8659,color:#fff
+    style REMOTE fill:#4a9eff,color:#fff
+    style MOTORS fill:#e67e22,color:#fff

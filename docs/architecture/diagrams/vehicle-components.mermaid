@@ -1,0 +1,49 @@
+%%{init: {'theme': 'base'}}%%
+flowchart TB
+    subgraph VEHICLE["Vehicle Container (Docker: acorn_vehicle)"]
+        subgraph MAIN_PROC["main_process.py (Orchestrator)"]
+            ROBOT[Robot Object<br/>Aggregated State]
+            CMD_HANDLER[Command Handler<br/>Server Commands]
+        end
+
+        subgraph REMOTE_CTRL["remote_control_process.py (Autonomy)"]
+            GPS_READER[GPS Reader<br/>Dual UBlox]
+            PATH_FOLLOW[Path Follower<br/>Spline + PID]
+            STEERING_CALC[Steering Calculator<br/>Swerve Kinematics]
+            JOYSTICK[Joystick Handler<br/>S.Bus / evdev]
+            STATE_MACHINE[Control State Machine]
+        end
+
+        subgraph MOTOR_PROC["motors_can.py (Motor Interface)"]
+            CAN_COMM[CAN Communication<br/>isotp protocol]
+            CORNER_CTRL[Corner Controllers<br/>x4 corners]
+            VOLTAGE_MON[Voltage Monitor<br/>ADC sampling]
+        end
+
+        subgraph SUPPORT_PROCS["Support Processes"]
+            WIFI_PROC[wifi.py<br/>WiFi Monitor]
+            NVIDIA_PROC[nvidia_power_process.py<br/>GPU Power Mgmt]
+            LED_PROC[led_control.py<br/>Status LEDs]
+            RTCM_PROC[rtcm_relay.py<br/>RTK Corrections]
+        end
+
+        subgraph SERVER_COMMS["server_comms.py (ZMQ Client)"]
+            ZMQ_CLIENT[ZMQ REQ Socket<br/>Lazy Pirate Pattern]
+        end
+    end
+
+    %% Inter-process communication
+    MAIN_PROC <-->|"Pipe + Pickle"| SERVER_COMMS
+    MAIN_PROC <-->|"Manager Dict<br/>+ Lock"| REMOTE_CTRL
+    REMOTE_CTRL <-->|"Shared Memory<br/>(numpy arrays)"| MOTOR_PROC
+    MAIN_PROC <-->|"Pipe"| WIFI_PROC
+    MAIN_PROC <-->|"Pipe"| NVIDIA_PROC
+
+    %% External connections
+    ZMQ_CLIENT <-->|"ZMQ TCP:5570"| EXTERNAL_SERVER[Server]
+    CAN_COMM <-->|"CAN Bus"| MOTORS_HW[Motors]
+    GPS_READER <-->|"Serial"| GPS_HW[GPS Receivers]
+
+    style MAIN_PROC fill:#2d8659,color:#fff
+    style REMOTE_CTRL fill:#4a9eff,color:#fff
+    style MOTOR_PROC fill:#e67e22,color:#fff

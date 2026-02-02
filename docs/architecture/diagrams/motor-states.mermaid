@@ -1,0 +1,26 @@
+%%{init: {'theme': 'base'}}%%
+stateDiagram-v2
+    [*] --> DISCONNECTED: Power On
+
+    DISCONNECTED --> DISABLED: CAN ping success<br/>AND voltage > 15V
+    DISABLED --> ENABLED: Steering homing complete<br/>AND motion_allowed=true
+    ENABLED --> DISABLED: motion_allowed=false<br/>OR thermal shutdown
+    DISABLED --> DISCONNECTED: CAN timeout
+    ENABLED --> DISCONNECTED: CAN timeout
+
+    note right of DISCONNECTED
+        motors_can.py attempts
+        ping every 2 seconds
+    end note
+
+    note right of DISABLED
+        Waiting for:
+        - Steering initialization
+        - Voltage OK
+        - No thermal fault
+    end note
+
+    note right of ENABLED
+        Accepting steering
+        and velocity commands
+    end note

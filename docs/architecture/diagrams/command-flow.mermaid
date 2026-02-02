@@ -1,0 +1,40 @@
+%%{init: {'theme': 'base'}}%%
+flowchart RL
+    subgraph UI["Web UI"]
+        BTN[Button Click<br/>e.g., Enable Autonomy]
+    end
+
+    subgraph FLASK["Flask Server"]
+        API["/api/set_vehicle_autonomy"]
+        REDIS_W[redis_utils.py]
+    end
+
+    subgraph REDIS["Redis"]
+        CMD_KEY["command:key"]
+    end
+
+    subgraph ZMQ["ZMQ Layer"]
+        WORKER[ZMQ Worker]
+        QUEUE[ZMQ Queue]
+    end
+
+    subgraph VEHICLE["Vehicle"]
+        COMMS[server_comms.py]
+        MAIN[main_process.py]
+        RC[remote_control_process.py]
+    end
+
+    BTN -->|"HTTP GET"| API
+    API -->|"pickle(RobotCommand)"| REDIS_W
+    REDIS_W -->|"SET"| CMD_KEY
+
+    COMMS -->|"Periodic poll"| QUEUE
+    QUEUE -->|"Route"| WORKER
+    WORKER -->|"GET command:key"| CMD_KEY
+    WORKER -->|"_CMD_ROBOT_COMMAND"| COMMS
+    COMMS -->|"Pipe"| MAIN
+    MAIN -->|"Manager Dict"| RC
+
+    style UI fill:#f9f,stroke:#333
+    style FLASK fill:#4a9eff,color:#fff
+    style VEHICLE fill:#2d8659,color:#fff
