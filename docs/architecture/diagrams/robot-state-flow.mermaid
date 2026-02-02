@@ -1,0 +1,49 @@
+%%{init: {'theme': 'base'}}%%
+flowchart LR
+    subgraph SENSORS["Sensors"]
+        GPS[Dual GPS<br/>UBlox F9P]
+        VOLTAGE[Voltage ADC]
+        TEMP[Motor Temps]
+        WIFI[WiFi Signal]
+    end
+
+    subgraph VEHICLE["Vehicle Processes"]
+        RC[remote_control_process]
+        MOTORS[motors_can]
+        WIFI_P[wifi.py]
+        MAIN[main_process]
+    end
+
+    subgraph NETWORK["Network"]
+        ZMQ_C[ZMQ Client]
+        ZMQ_S[ZMQ Server]
+    end
+
+    subgraph SERVER["Server"]
+        REDIS[(Redis)]
+        FLASK[Flask API]
+    end
+
+    subgraph UI["User Interface"]
+        BROWSER[Web Browser]
+    end
+
+    GPS -->|Serial| RC
+    VOLTAGE -->|Shared Mem| MOTORS
+    TEMP -->|Shared Mem| MOTORS
+    WIFI -->|iwconfig| WIFI_P
+
+    RC -->|"Manager Dict"| MAIN
+    MOTORS -->|"Shared Mem"| RC
+    WIFI_P -->|"Pipe"| MAIN
+
+    MAIN -->|"Robot pickle"| ZMQ_C
+    ZMQ_C -->|"TCP:5570"| ZMQ_S
+    ZMQ_S -->|"SET"| REDIS
+
+    REDIS -->|"GET"| FLASK
+    FLASK -->|"JSON"| BROWSER
+
+    style SENSORS fill:#f9f,stroke:#333
+    style VEHICLE fill:#2d8659,color:#fff
+    style SERVER fill:#4a9eff,color:#fff

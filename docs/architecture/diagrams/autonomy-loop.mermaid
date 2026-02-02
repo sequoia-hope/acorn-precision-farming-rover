@@ -1,0 +1,61 @@
+%%{init: {'theme': 'base'}}%%
+flowchart TB
+    subgraph INPUT["Inputs"]
+        GPS[GPS Sample<br/>lat, lon, heading]
+        PATH[Loaded Path<br/>spline points]
+        CMD[Commands<br/>activate, velocity]
+    end
+
+    subgraph CALC["Calculations - steering.py"]
+        CLOSEST[Find closest point<br/>on path spline]
+        ERRORS[Calculate errors:<br/>- lateral distance<br/>- angular difference]
+        DIRECTION[Determine driving<br/>direction]
+    end
+
+    subgraph PID["PID Control"]
+        P_TERM[P terms:<br/>strafe_p = error × lateral_P<br/>steer_p = error × angular_P]
+        D_TERM[D terms:<br/>strafe_d = rate × lateral_D<br/>steer_d = rate × angular_D]
+        SUM[Sum: steer = steer_p + steer_d<br/>strafe = strafe_p + strafe_d]
+    end
+
+    subgraph SAFETY["Safety Checks"]
+        DIST_CHECK{Distance<br/>< 2.5m?}
+        ANGLE_CHECK{Angle<br/>< 120°?}
+        RTK_CHECK{RTK age<br/>< 20s?}
+        VOLT_CHECK{Voltage<br/>> 25V?}
+    end
+
+    subgraph OUTPUT["Outputs"]
+        SWERVE[Swerve Kinematics<br/>calculate_steering]
+        MOTORS[Motor Commands<br/>via Shared Memory]
+    end
+
+    GPS --> CLOSEST
+    PATH --> CLOSEST
+    CLOSEST --> ERRORS
+    ERRORS --> DIRECTION
+
+    ERRORS --> P_TERM
+    ERRORS --> D_TERM
+    P_TERM --> SUM
+    D_TERM --> SUM
+
+    CMD --> DIST_CHECK
+    SUM --> DIST_CHECK
+    DIST_CHECK -->|Yes| ANGLE_CHECK
+    ANGLE_CHECK -->|Yes| RTK_CHECK
+    RTK_CHECK -->|Yes| VOLT_CHECK
+    VOLT_CHECK -->|Yes| SWERVE
+
+    DIST_CHECK -->|No| ZERO[Zero Output]
+    ANGLE_CHECK -->|No| ZERO
+    RTK_CHECK -->|No| ZERO
+    VOLT_CHECK -->|No| ZERO
+
+    SWERVE --> MOTORS
+
+    style INPUT fill:#e1f5fe
+    style CALC fill:#fff3e0
+    style PID fill:#e8f5e9
+    style SAFETY fill:#ffebee
+    style OUTPUT fill:#f3e5f5

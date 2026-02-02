@@ -1,0 +1,32 @@
+%%{init: {'theme': 'base'}}%%
+sequenceDiagram
+    participant RC as remote_control_process
+    participant IN as motor_input_sharedmem
+    participant OUT as motor_output_sharedmem
+    participant MOT as motors_can
+
+    Note over RC,MOT: Continuous Loop
+
+    RC->>OUT: Check output[0][1]
+    alt CLEAR_TO_WRITE
+        RC->>RC: Build steering commands
+        RC->>IN: Write [angles, velocities, FRESH]
+    else MOTOR_READING
+        RC->>RC: Wait (0.5ms intervals)
+    end
+
+    MOT->>IN: Check input[4][0]
+    alt FRESH_MESSAGE
+        MOT->>OUT: Set output[0][1] = MOTOR_READING
+        MOT->>IN: Read steering commands
+        MOT->>IN: Set input[4][0] = STALE
+        MOT->>MOT: Send CAN commands
+        MOT->>MOT: Receive CAN feedback
+        MOT->>OUT: Write [state, voltages, temps]
+        MOT->>OUT: Set output[0][1] = CLEAR_TO_WRITE
+    else STALE_MESSAGE
+        MOT->>MOT: Continue with last commands
+    end
+
+    RC->>OUT: Read motor feedback
+    RC->>RC: Update motor_state, voltages

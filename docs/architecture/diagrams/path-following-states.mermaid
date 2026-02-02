@@ -1,0 +1,32 @@
+%%{init: {'theme': 'base'}}%%
+stateDiagram-v2
+    [*] --> WAIT_PATH: No path loaded
+
+    WAIT_PATH --> PATH_LOADED: Path received
+
+    PATH_LOADED --> WAIT_AUTONOMY: autonomy_hold=true
+    PATH_LOADED --> ALARM_WARNING: autonomy enabled<br/>AND !autonomy_hold
+
+    ALARM_WARNING --> FOLLOWING: 4 sec elapsed
+
+    FOLLOWING --> END_PAUSE: Distance to end < 1m<br/>AND angle < 45°
+    END_PAUSE --> PATH_COMPLETE: 5 sec pause complete
+
+    PATH_COMPLETE --> FOLLOWING: repeat_path=true
+    PATH_COMPLETE --> NEXT_ROW: Multi-row path
+    PATH_COMPLETE --> WAIT_AUTONOMY: Single path complete
+
+    NEXT_ROW --> FOLLOWING: Load next row
+
+    FOLLOWING --> ERROR_PAUSE: Safety check failed
+    ERROR_PAUSE --> FOLLOWING: 60 sec retry<br/>(non-fatal error)
+    ERROR_PAUSE --> WAIT_AUTONOMY: Fatal error
+
+    state FOLLOWING {
+        [*] --> READ_GPS
+        READ_GPS --> CALC_ERROR: GPS valid
+        CALC_ERROR --> PID_CONTROL
+        PID_CONTROL --> SAFETY_CHECK
+        SAFETY_CHECK --> SEND_MOTORS: All checks pass
+        SEND_MOTORS --> READ_GPS
+    }

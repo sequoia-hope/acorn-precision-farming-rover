@@ -1,0 +1,41 @@
+%%{init: {'theme': 'base'}}%%
+stateDiagram-v2
+    [*] --> STARTUP: Power On
+
+    STARTUP --> GPS_STARTUP: Initialize complete
+    GPS_STARTUP --> ONLINE: GPS fix acquired
+
+    ONLINE --> AUTONOMY: activate_autonomy=true<br/>AND path loaded<br/>AND !autonomy_hold
+    ONLINE --> OVERRIDE: Joystick activated
+
+    AUTONOMY --> AUTONOMY_PAUSE: Path end reached<br/>(5 sec pause)
+    AUTONOMY_PAUSE --> AUTONOMY: Pause complete
+
+    AUTONOMY --> ONLINE: activate_autonomy=false
+    AUTONOMY --> OVERRIDE: Joystick activated
+
+    state ERROR_STATES {
+        DISTANCE_ERROR: Too far from path
+        ANGLE_ERROR: Angle too great
+        RTK_AGE_ERROR: RTK data old
+        SOLUTION_AGE_ERROR: GPS solution old
+        LOW_VOLTAGE: Battery low
+        SERVER_ERROR: Server timeout
+        MOTOR_ERROR: Motor fault
+        NO_STEERING: No solution
+    }
+
+    AUTONOMY --> DISTANCE_ERROR: distance > 2.5m
+    AUTONOMY --> ANGLE_ERROR: angle > 120°
+    AUTONOMY --> RTK_AGE_ERROR: RTK age > 20s
+    AUTONOMY --> SOLUTION_AGE_ERROR: solution age > 1s
+
+    DISTANCE_ERROR --> AUTONOMY: Error clears<br/>(after 60s retry)
+    ANGLE_ERROR --> AUTONOMY: Error clears
+    RTK_AGE_ERROR --> AUTONOMY: Error clears
+    SOLUTION_AGE_ERROR --> AUTONOMY: Error clears
+
+    OVERRIDE --> ONLINE: Joystick released<br/>AND autonomy_allowed
+    OVERRIDE --> OVERRIDE: Joystick active
+
+    ERROR_STATES --> ONLINE: autonomy_hold=true<br/>AND clear_autonomy_hold

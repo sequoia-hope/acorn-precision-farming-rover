@@ -1,0 +1,38 @@
+%%{init: {'theme': 'base'}}%%
+flowchart TB
+    subgraph SERVER["Server Container (Docker: acorn_server)"]
+        subgraph ZMQ_LAYER["ZMQ Layer"]
+            PPQ[zmq_ppqueue.py<br/>Paranoid Pirate Queue<br/>ROUTER-ROUTER]
+            WORKERS[zmq_server_pirate.py<br/>Worker Pool<br/>x N workers]
+        end
+
+        subgraph WEB_LAYER["Web Layer"]
+            FLASK[server.py<br/>Flask Application<br/>HTTP REST API]
+        end
+
+        subgraph DATA_LAYER["Data Layer"]
+            REDIS[(Redis<br/>State Database)]
+            UTILS[redis_utils.py<br/>Key Management]
+        end
+
+        subgraph AUTOMATION["Automation Layer"]
+            SYSMGR[system_manager.py<br/>Fleet Automation]
+        end
+    end
+
+    subgraph CLIENTS["Clients"]
+        VEHICLE[Vehicle<br/>ZMQ Client]
+        BROWSER[Web Browser<br/>HTTP Client]
+    end
+
+    %% Connections
+    VEHICLE <-->|"ZMQ:5570"| PPQ
+    PPQ <-->|"ZMQ:5569"| WORKERS
+    WORKERS --> REDIS
+    BROWSER -->|"HTTP:80"| FLASK
+    FLASK --> REDIS
+    SYSMGR --> REDIS
+
+    style ZMQ_LAYER fill:#4a9eff,color:#fff
+    style WEB_LAYER fill:#2d8659,color:#fff
+    style DATA_LAYER fill:#e67e22,color:#fff

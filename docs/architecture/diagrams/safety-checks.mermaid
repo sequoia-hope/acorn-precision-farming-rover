@@ -1,0 +1,28 @@
+%%{init: {'theme': 'base'}}%%
+flowchart TB
+    START[Safety Checks] --> V{Voltage > 25V?}
+    V -->|No| LOW_V[CONTROL_LOW_VOLTAGE<br/>zero_output=true]
+    V -->|Yes| D{Distance < 2.5m?}
+
+    D -->|No| DIST_E[CONTROL_AUTONOMY_ERROR_DISTANCE<br/>zero_output=true]
+    D -->|Yes| A{Angle < 120°?}
+
+    A -->|No| ANG_E[CONTROL_AUTONOMY_ERROR_ANGLE<br/>zero_output=true]
+    A -->|Yes| R{RTK age < 20s?}
+
+    R -->|No| RTK_E[CONTROL_AUTONOMY_ERROR_RTK_AGE<br/>zero_output=true]
+    R -->|Yes| S{Solution age < 1s?}
+
+    S -->|No| SOL_E[CONTROL_AUTONOMY_ERROR_SOLUTION_AGE<br/>zero_output=true]
+    S -->|Yes| SRV{Server comms < 60s?}
+
+    SRV -->|No| SRV_E[Server timeout<br/>zero_output=true]
+    SRV -->|Yes| OK[All checks passed<br/>Continue autonomy]
+
+    style OK fill:#2d8659,color:#fff
+    style LOW_V fill:#c0392b,color:#fff
+    style DIST_E fill:#c0392b,color:#fff
+    style ANG_E fill:#c0392b,color:#fff
+    style RTK_E fill:#c0392b,color:#fff
+    style SOL_E fill:#c0392b,color:#fff
+    style SRV_E fill:#c0392b,color:#fff

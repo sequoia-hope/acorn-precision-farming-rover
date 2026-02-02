@@ -1,0 +1,22 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4a9eff', 'secondaryColor': '#2d8659'}}}%%
+flowchart TB
+    subgraph External Actors
+        OP[Operator<br/>Web Browser]
+        GPS[GPS Satellites<br/>GNSS Constellation]
+        RTK[RTK Base Station<br/>RTCM Corrections]
+        RC[RC Controller<br/>Manual Override]
+    end
+
+    subgraph Acorn System
+        SERVER[Server<br/>Command & Control]
+        VEHICLE[Vehicle<br/>Rover Hardware]
+    end
+
+    OP -->|HTTP/REST| SERVER
+    SERVER <-->|ZMQ| VEHICLE
+    GPS -->|RF Signals| VEHICLE
+    RTK -->|RTCM Serial| VEHICLE
+    RC -->|S.Bus RF| VEHICLE
+
+    style SERVER fill:#4a9eff,color:#fff
+    style VEHICLE fill:#2d8659,color:#fff
