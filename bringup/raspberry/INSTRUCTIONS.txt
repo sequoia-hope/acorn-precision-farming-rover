@@ -27,7 +27,8 @@ Note the rsync command that is given by the script. You will use that shortly.
 
 When completed this command will unmount the CM4. Unplug it, switch the boot
 switch to normal boot, and plug it back in to power. Connect an ethernet
-cable, and after a minute or so, ssh in to the device. The password is <redacted>.
+cable, and after a minute or so, ssh in to the device as user acorn with the password you
+gave bringup-cm4.sh (ACORN_PASSWORD, or the one you typed at its prompt).
 
 You may want to copy the ssh id so you don't need to type the password. To do
 this run ssh-copy-id acorn@<hostname> and hit enter. Say yes if needed, and

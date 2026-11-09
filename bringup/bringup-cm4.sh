@@ -7,6 +7,21 @@ if [ $# -eq 0 ]; then
  exit 1
 fi
 
+# Credentials are never stored in git. Supply them via the environment:
+#   ACORN_WIFI_PSK  WPA passphrase written into raspberry/*.nmconnection
+#   ACORN_PASSWORD  password for the 'acorn' user (prompted for if unset)
+if [ -z "${ACORN_WIFI_PSK:-}" ]; then
+  echo "Error: set ACORN_WIFI_PSK to the WiFi passphrase for the vehicle network."
+  exit 1
+fi
+if [ -z "${ACORN_PASSWORD:-}" ]; then
+  read -r -s -p "Password for user acorn: " ACORN_PASSWORD; echo
+  if [ -z "$ACORN_PASSWORD" ]; then
+    echo "Error: empty password."
+    exit 1
+  fi
+fi
+
 DIR="/media/$USER/bootfs"
 
 if [ ! -d "$DIR" ]; then
@@ -29,13 +44,17 @@ sudo cp overlay/dual-sc16is752-spi1.dtbo /media/$USER/bootfs/overlays/
 sudo cp raspberry/99-gps.rules /media/$USER/rootfs/etc/udev/rules.d/
 sudo cp raspberry/80-can.network /media/$USER/rootfs/etc/systemd/network/
 sudo cp raspberry/*.nmconnection /media/$USER/rootfs/etc/NetworkManager/system-connections
-sudo chmod -R 600 /media/$USER/rootfs/etc/NetworkManager/system-connections/twisted*.nmconnection
+PSK_ESCAPED=$(printf '%s' "$ACORN_WIFI_PSK" | sed -e 's/[\/&|\\]/\\&/g')
+for f in raspberry/*.nmconnection; do
+  sudo sed -i "s|__ACORN_WIFI_PSK__|$PSK_ESCAPED|" "/media/$USER/rootfs/etc/NetworkManager/system-connections/$(basename "$f")"
+done
+sudo chmod -R 600 /media/$USER/rootfs/etc/NetworkManager/system-connections/*.nmconnection
 sudo chown -R root:root /media/$USER/rootfs/etc/NetworkManager/system-connections/*
 sudo cp raspberry/can-isotp.conf /media/$USER/rootfs/etc/modprobe.d/
 sudo cp raspberry/modules /media/$USER/rootfs/etc/
 
-# user acorn password <redacted>
-sudo echo 'acorn:__PASSWORD_HASH__' > /media/$USER/bootfs/userconf
+# Create user acorn with the password from ACORN_PASSWORD.
+echo "acorn:$(printf '%s' "$ACORN_PASSWORD" | openssl passwd -6 -stdin)" | sudo tee /media/$USER/bootfs/userconf > /dev/null
 
 # rm -rf /media/$USER/rootfs/home/acorn/Bookshelf
 # rm -rf /media/$USER/rootfs/home/acorn/Desktop

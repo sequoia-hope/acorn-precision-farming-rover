@@ -4,3 +4,4 @@
 .coverage
 error_log.txt
 bringup/raspberry/wpa_supplicant.conf
+server/static/js/local_config.js

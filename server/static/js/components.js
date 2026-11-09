@@ -304,13 +304,18 @@ Vue.component("map-canvas", {
   },
 
   async created() {
+    // Optional OpenDroneMap layer. Credentials live in the gitignored
+    // static/js/local_config.js (see local_config.example.js); without it the
+    // drone map layer is skipped.
+    const odm = (window.ACORN_LOCAL_CONFIG || {}).odm;
+    if (!odm) return;
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), 2500);
     try {
-      const resp = await fetch("http://192.168.1.170:8090/api/token-auth/", {
+      const resp = await fetch(`${odm.url}/api/token-auth/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: "taylor", password: "<redacted>" }),
+        body: JSON.stringify({ username: odm.username, password: odm.password }),
         signal: controller.signal,
         });
       clearTimeout(id);
@@ -320,7 +325,7 @@ Vue.component("map-canvas", {
         console.log(token)
         token = token["token"]
         const open_drone_map_layer = {
-          url: "http://192.168.1.170:8090/api/projects/3/tasks/3116cce4-4215-4de9-9e9a-0e9c93df87f6/orthophoto/tiles/{z}/{x}/{y}.png?jwt={accessToken}",
+          url: `${odm.url}/api/projects/${odm.tilesPath}/orthophoto/tiles/{z}/{x}/{y}.png?jwt={accessToken}`,
           options: {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.twistedfields.com/">Twisted Fields</a>',
             maxZoom: 22,
@@ -360,18 +365,32 @@ Vue.component("map-canvas", {
   },
 
   data () {
-    const mapbox_layer = {
-      url: "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-      options: {
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        maxZoom: 22,
-        id: "mapbox/satellite-v9",
-        tileSize: 512,
-        zoomOffset: -1,
-        accessToken: "pk.<redacted-mapbox-token>",
-      },
-    };
-    let layers = {Mapbox: mapbox_layer};
+    // Mapbox satellite imagery needs a token from the gitignored
+    // static/js/local_config.js; without one, fall back to OpenStreetMap.
+    const mapboxToken = (window.ACORN_LOCAL_CONFIG || {}).mapboxToken;
+    let layers;
+    if (mapboxToken) {
+      layers = {Mapbox: {
+        url: "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+        options: {
+          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          maxZoom: 22,
+          id: "mapbox/satellite-v9",
+          tileSize: 512,
+          zoomOffset: -1,
+          accessToken: mapboxToken,
+        },
+      }};
+    } else {
+      layers = {OpenStreetMap: {
+        url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        options: {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 22,
+          maxNativeZoom: 19,
+        },
+      }};
+    }
     return {
       selectedRobot: null,
       userPolygon: null,
