@@ -97,7 +97,12 @@ class MainProcess():
     def setup(self, config):
         # Initialize robot object.
         name = str(config["vehicle_name"])
-        server = str(config["server"])
+        # ACORN_SERVER overrides the yaml; one of them must name the server.
+        server = os.environ.get("ACORN_SERVER") or config.get("server")
+        if not server:
+            raise RuntimeError("No server configured: set ACORN_SERVER or add "
+                               "'server: <host>:5570' to the vehicle yaml config")
+        server = str(server)
         if ":" not in server:
             server += ":5570"  # back compatibility to old server config files.
         site = str(config["site"])

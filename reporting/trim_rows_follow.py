@@ -55,7 +55,7 @@ from scipy.interpolate import splprep, splev
 _SMOOTH_MULTIPLIER = 0.00000000001
 
 # r = redis.Redis(
-#     host='acornserver.local',
+#     host=os.environ["ACORN_REDIS_HOST"],
 #     port=6379)
 
 r = redis.Redis(

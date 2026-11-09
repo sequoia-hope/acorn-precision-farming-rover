@@ -203,7 +203,7 @@ flowchart TB
 
 ```yaml
 vehicle_name: acorn1              # Unique identifier for this rover
-server: 192.168.1.170:5570        # ZMQ server address
+server: <server-host>:5570        # ZMQ server address (or set ACORN_SERVER)
 site: twistedfields               # Site/fleet namespace
 ```
 
@@ -230,7 +230,7 @@ flowchart LR
     end
 
     subgraph SERVER_NETWORK["Server Network"]
-        SRV[Server<br/>192.168.1.170]
+        SRV[Server<br/>server-host]
     end
 
     subgraph OPERATOR_NETWORK["Operator Access"]

@@ -20,6 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *********************************************************************
 """
+import os
 import sys
 
 from scipy.interpolate import splprep, splev
@@ -39,11 +40,11 @@ from datetime import datetime
 _SMOOTH_MULTIPLIER = 0.00000000001
 
 # r = redis.Redis(
-#     host='acornserver.local',
+#     host=os.environ["ACORN_REDIS_HOST"],
 #     port=6379)
 
 r = redis.Redis(
-    host='192.168.1.170',
+    host=os.environ["ACORN_REDIS_HOST"],
     port=6379)
 
 # r.set('foo', 'bar')

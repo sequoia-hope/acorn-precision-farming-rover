@@ -21,6 +21,7 @@ limitations under the License.
 *********************************************************************
 """
 
+import os
 import redis
 import time
 import pickle
@@ -39,7 +40,7 @@ from remote_control_process import EnergySegment
 _SMOOTH_MULTIPLIER = 0.00000000001
 
 r = redis.Redis(
-    host='192.168.1.170',
+    host=os.environ["ACORN_REDIS_HOST"],
     port=6379)
 
 

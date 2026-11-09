@@ -1,5 +1,5 @@
 #!/bin/bash
-FOLDER=/home/taylor/Software/kernel_acorn
+FOLDER="${KERNEL_SRC:-$HOME/Software/kernel_acorn}"
 TAG_NAME=1.20230405
 echo $FOLDER
 mkdir -p $FOLDER

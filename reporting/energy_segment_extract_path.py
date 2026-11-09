@@ -21,6 +21,7 @@ limitations under the License.
 *********************************************************************
 """
 
+import os
 import sys
 
 from scipy.interpolate import splprep, splev
@@ -46,11 +47,11 @@ import tzlocal # $ pip install tzlocal
 _SMOOTH_MULTIPLIER = 0.00000000001
 
 r = redis.Redis(
-    host='192.168.1.170',
+    host=os.environ["ACORN_REDIS_HOST"],
     port=6379)
 
 # r = redis.Redis(
-#     host='192.168.1.170',
+#     host=os.environ["ACORN_REDIS_HOST"],
 #     port=6799)
 
 # r.set('foo', 'bar')

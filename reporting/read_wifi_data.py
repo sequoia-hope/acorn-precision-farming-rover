@@ -20,6 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *********************************************************************
 """
+import os
 from remote_control_process import EnergySegment
 import redis
 import time
@@ -38,11 +39,11 @@ sys.path.append('../vehicle')
 _SMOOTH_MULTIPLIER = 0.00000000001
 
 r = redis.Redis(
-    host='192.168.1.170',
+    host=os.environ["ACORN_REDIS_HOST"],
     port=6379)
 
 # r = redis.Redis(
-#     host='192.168.1.170',
+#     host=os.environ["ACORN_REDIS_HOST"],
 #     port=6799)
 
 # r.set('foo', 'bar')

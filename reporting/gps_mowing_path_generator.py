@@ -55,7 +55,7 @@ _SMOOTH_MULTIPLIER = 0.00000000001
 _MIN_ALLOWED_PATH_ANGLE = 120
 
 # r = redis.Redis(
-#     host='acornserver.local',
+#     host=os.environ["ACORN_REDIS_HOST"],
 #     port=6379)
 
 r = redis.Redis(

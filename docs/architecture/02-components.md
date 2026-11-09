@@ -426,7 +426,7 @@ All server components communicate through Redis (no direct IPC):
 class Robot:
     # Identity
     name: str                    # "acorn1"
-    server: str                  # "192.168.1.170:5570"
+    server: str                  # "<server-host>:5570"
     site: str                    # "twistedfields"
     key: bytes                   # Redis key
 

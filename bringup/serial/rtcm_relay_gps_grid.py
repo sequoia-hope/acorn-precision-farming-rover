@@ -9,7 +9,10 @@ import struct
 import fcntl
 from pyrtcm import RTCMReader
 
-HOST = "192.168.1.50"  # The server's hostname or IP address
+# The RTK base station's address comes from ACORN_RTK_BASE_HOST. Required.
+HOST = os.environ.get("ACORN_RTK_BASE_HOST")
+if not HOST:
+    sys.exit("error: set ACORN_RTK_BASE_HOST to the RTK base station's hostname or address")
 PORT = 130  # The port used by the server
 
 BAUD = 921600

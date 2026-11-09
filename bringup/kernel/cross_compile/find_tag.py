@@ -1,8 +1,13 @@
 
+import os
 import subprocess
 import re
+import sys
 
-ROBOT_HOSTNAME = "acornv2"
+# The robot to query, e.g. ACORN_ROBOT_HOST=<robot-hostname>. Required.
+ROBOT_HOSTNAME = os.environ.get("ACORN_ROBOT_HOST")
+if not ROBOT_HOSTNAME:
+    sys.exit("error: set ACORN_ROBOT_HOST to the robot's hostname or address")
 
 match_string=r"Installed: \d:(\d.\d+)"
 

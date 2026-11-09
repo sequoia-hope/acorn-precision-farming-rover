@@ -1,3 +1,4 @@
+import os
 import sys
 sys.path.append("/home/acorn/vehicle")
 import time
@@ -73,7 +74,7 @@ if USE_DATABASE:
     import redis
     import pickle
     r = redis.Redis(
-        host='192.168.1.170',
+        host=os.environ["ACORN_REDIS_HOST"],
         port=6379)
 
 STATIONARY_TIME = 30

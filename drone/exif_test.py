@@ -62,7 +62,8 @@ sys.path.append('../vehicle')
 
 points = []
 target = "DJI_0635.JPG"
-path = "/home/taylor/Pictures/mapping/cap_dec_2_2020/images/"
+# Usage: exif_test.py <images dir> <output dir>
+path = sys.argv[1]
 
 target_path = os.path.join(path, target)
 target_coords = get_decimal_coordinates(get_exif(target_path))
@@ -81,9 +82,9 @@ for r, d, f in os.walk(path):
 
 
 index = 0
-# exif = get_exif('/home/taylor/Pictures/mapping/cap_dec_2_2020/images/DJI_0173.JPG')
+# exif = get_exif(os.path.join(path, 'DJI_0173.JPG'))
 # coords = get_decimal_coordinates(exif)
-out_path = "/home/taylor/Pictures/mapping/cap_dec_2_2020/gps_test/"
+out_path = sys.argv[2]
 # os.mkdir(out_path)
 
 

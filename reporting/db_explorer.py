@@ -36,7 +36,7 @@ from remote_control_process import EnergySegment, PathSection
 HIDE_AUTOGEN_PATHS = True
 
 r = redis.Redis(
-    # host='192.168.1.170',
+    # host=os.environ["ACORN_REDIS_HOST"],
     host='0.0.0.0',
     port=6379)
 

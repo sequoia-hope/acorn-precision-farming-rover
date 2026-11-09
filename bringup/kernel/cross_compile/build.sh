@@ -1,4 +1,4 @@
-FOLDER=/home/taylor/Software/kernel_acorn
+FOLDER="${KERNEL_SRC:-$HOME/Software/kernel_acorn}"
 cd $FOLDER
 KERNEL=kernel8
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig -j 24

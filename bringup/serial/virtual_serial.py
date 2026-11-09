@@ -4,15 +4,17 @@ import time
 import os
 import shlex
 import socket
+import sys
 
-HOST = "192.168.1.50"  # The server's hostname or IP address
-# HOST = "192.168.1.86"  # The server's hostname or IP address
-# HOST = "192.168.1.82"
+# The RTK base station's address comes from ACORN_RTK_BASE_HOST. Required.
+HOST = os.environ.get("ACORN_RTK_BASE_HOST")
+if not HOST:
+    sys.exit("error: set ACORN_RTK_BASE_HOST to the RTK base station's hostname or address")
 PORT = 65436  # The port used by the server
 
 COMMAND = 'socat -d -d pty,raw,echo=0 pty,raw,echo=0'
 
-LINKNAME = "/home/taylor/.wine/dosdevices/com1"
+LINKNAME = os.path.expanduser("~/.wine/dosdevices/com1")
 
 BAUD = 115200
 # LINKNAME = "/dev/ttyACM7"
